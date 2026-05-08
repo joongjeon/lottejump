@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>LOTTE JUMP · 롯데백화점 본점</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Noto+Serif+KR:wght@400;700&family=IM+Fell+English:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --gold-pale: #F5E8C0;
+    --burgundy: #8B1A2D;
+    --burgundy-dark: #5C0E1C;
+    --cream: #FAF5EC;
+    --dark: #1A1008;
+    --charcoal: #2C2416;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    font-family: 'Noto Serif KR', serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  #wrapper {
+    position: relative;
+    width: 360px;
+    height: 640px;
+    background: var(--cream);
+    overflow: hidden;
+    box-shadow: 0 0 80px rgba(201,168,76,0.3), 0 0 0 1px var(--gold);
+  }
+
+  /* ─── 장식 테두리 ─── */
+  #wrapper::before, #wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--gold);
+    pointer-events: none;
+    z-index: 100;
+  }
+  #wrapper::after {
+    inset: 10px;
+    border-color: rgba(201,168,76,0.3);
+  }
+
+  /* ─── 코너 장식 ─── */
+  .corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--gold);
+    border-style: solid;
+    z-index: 101;
+  }
+  .corner.tl { top: 4px; left: 4px; border-width: 2px 0 0 2px; }
+  .corner.tr { top: 4px; right: 4px; border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: 4px; left: 4px; border-width: 0 0 2px 2px; }
+  .corner.br { bottom: 4px; right: 4px; border-width: 0 2px 2px 0; }
+
+  /* ─── HUD ─── */
+  #hud {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--burgundy-dark);
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 50;
+  }
+
+  #hud .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    line-height: 1.2;
+  }
+  #hud .logo span {
+    display: block;
+    font-size: 8px;
+    font-weight: 400;
+    color: var(--gold-pale);
+    letter-spacing: 0.2em;
+    margin-top: 1px;
+  }
+
+  #hud .score-box {
+    text-align: right;
+  }
+  #hud .score-label {
+    font-size: 7px;
+    letter-spacing: 0.2em;
+    color: rgba(201,168,76,0.6);
+    text-transform: uppercase;
+  }
+  #hud .score-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── 게임 캔버스 ─── */
+  #gameCanvas {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    width: 360px;
+    height: 584px; /* 640 - 56 hud */
+  }
+
+  /* ─── 타이틀 화면 ─── */
+  #titleScreen {
+    position: absolute;
+    inset: 0;
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+  }
+
+  .title-emblem {
+    width: 60px; height: 60px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .title-emblem::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 50%;
+  }
+  .title-emblem .emblem-l {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+
+  .title-divider {
+    width: 120px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 12px 0;
+  }
+
+  .title-main {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--burgundy-dark);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .title-sub {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+  .title-desc {
+    font-size: 11px;
+    color: var(--charcoal);
+    margin-top: 24px;
+    text-align: center;
+    line-height: 1.8;
+    letter-spacing: 0.05em;
+  }
+  .title-floor-info {
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    font-style: italic;
+  }
+
+  #startBtn {
+    margin-top: 32px;
+    background: var(--burgundy-dark);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 12px 40px;
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  #startBtn:hover, #startBtn:active {
+    background: var(--gold);
+    color: var(--burgundy-dark);
+  }
+
+  /* ─── 층 안내 배너 ─── */
+  #floorBanner {
+    position: absolute;
+    left: 20px; right: 20px;
+    bottom: 70px;
+    background: rgba(139,26,45,0.92);
+    border: 1px solid var(--gold);
+    padding: 8px 14px;
+    display: none;
+    z-index: 55;
+    pointer-events: none;
+  }
+  #floorBanner .fl-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  #floorBanner .fl-name {
+    font-size: 11px;
+    color: var(--gold-pale);
+    letter-spacing: 0.1em;
+    margin-top: 1px;
+  }
+
+  /* ─── 층 표시 오버레이 (우측) ─── */
+  #floorIndicator {
+    position: absolute;
+    right: 18px;
+    top: 70px;
+    z-index: 55;
+    pointer-events: none;
+  }
+  #floorIndicator .fi-label {
+    font-size: 7px;
+    letter-spacing: 0.2em;
+    color: rgba(139,26,45,0.5);
+    text-align: center;
+  }
+  #floorIndicator .fi-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--burgundy);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1;
+  }
+
+  /* ─── GAME OVER 화면 ─── */
+  #gameoverScreen {
+    position: absolute;
+    inset: 0;
+    background: rgba(26,16,8,0.88);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+  }
+  .go-deco {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--gold-pale);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+  .go-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+  .go-divider {
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 16px 0;
+  }
+  .go-result {
+    text-align: center;
+  }
+  .go-result .label {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: rgba(201,168,76,0.6);
+    text-transform: uppercase;
+  }
+  .go-result .value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .go-result .floor-name {
+    font-size: 11px;
+    color: var(--gold-pale);
+    margin-top: 4px;
+    letter-spacing: 0.1em;
+  }
+  .go-hi {
+    margin-top: 16px;
+    font-size: 10px;
+    color: rgba(201,168,76,0.5);
+    letter-spacing: 0.2em;
+  }
+  #retryBtn {
+    margin-top: 28px;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 10px 36px;
+    font-family: 'Playfair Display', serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  #retryBtn:hover, #retryBtn:active {
+    background: var(--gold);
+    color: var(--dark);
+  }
+
+  /* ─── 컨트롤 버튼 ─── */
+  #controls {
+    position: absolute;
+    bottom: 14px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 28px;
+    z-index: 55;
+  }
+  .ctrl-btn {
+    width: 72px; height: 44px;
+    background: var(--burgundy-dark);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.1s;
+    letter-spacing: 0;
+  }
+  .ctrl-btn:active {
+    background: var(--gold);
+    color: var(--dark);
+  }
+  .ctrl-hint {
+    font-size: 7px;
+    color: rgba(139,26,45,0.4);
+    text-align: center;
+    letter-spacing: 0.15em;
+    margin-top: 2px;
+  }
+  .ctrl-wrap { display: flex; flex-direction: column; align-items: center; }
+
+  /* ─── 층 도달 팝업 ─── */
+  #floorPopup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: var(--burgundy-dark);
+    border: 2px solid var(--gold);
+    padding: 16px 28px;
+    text-align: center;
+    z-index: 70;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  #floorPopup.show { transform: translate(-50%, -50%) scale(1); }
+  #floorPopup .fp-floor {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  #floorPopup .fp-name {
+    font-size: 12px;
+    color: var(--gold-pale);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="wrapper">
+  <!-- 코너 장식 -->
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="logo">LOTTE<span>DEPARTMENT STORE</span></div>
+    <div class="score-box">
+      <div class="score-label">BEST</div>
+      <div class="score-val" id="hiScore">B1F</div>
+    </div>
+  </div>
+
+  <!-- 층 표시 -->
+  <div id="floorIndicator">
+    <div class="fi-label">FLOOR</div>
+    <div class="fi-val" id="currentFloor">B1</div>
+  </div>
+
+  <!-- 게임 캔버스 -->
+  <canvas id="gameCanvas" width="360" height="584"></canvas>
+
+  <!-- 층 팝업 -->
+  <div id="floorPopup">
+    <div class="fp-floor" id="fpFloor">1F</div>
+    <div class="fp-name" id="fpName">영패션</div>
+  </div>
+
+  <!-- 컨트롤 -->
+  <div id="controls">
+    <div class="ctrl-wrap">
+      <button class="ctrl-btn" id="btnLeft">◀</button>
+      <div class="ctrl-hint">LEFT</div>
+    </div>
+    <div class="ctrl-wrap">
+      <button class="ctrl-btn" id="btnRight">▶</button>
+      <div class="ctrl-hint">RIGHT</div>
+    </div>
+  </div>
+
+  <!-- 타이틀 -->
+  <div id="titleScreen">
+    <div class="title-emblem"><span class="emblem-l">L</span></div>
+    <div class="title-main">LOTTE</div>
+    <div class="title-sub">DEPARTMENT JUMP</div>
+    <div class="title-divider"></div>
+    <div class="title-desc">
+      지하 1층에서 출발하여<br>
+      14층 레스토랑가까지 올라가세요
+    </div>
+    <div class="title-floor-info">B1F → 14F · 롯데백화점 본점</div>
+    <button id="startBtn" onclick="startGame()">▶&nbsp;&nbsp;START</button>
+  </div>
+
+  <!-- 게임오버 -->
+  <div id="gameoverScreen">
+    <div class="go-deco">— LOTTE DEPARTMENT STORE —</div>
+    <div class="go-title">GAME OVER</div>
+    <div class="go-divider"></div>
+    <div class="go-result">
+      <div class="label">도달 층수</div>
+      <div class="value" id="goFloor">B1F</div>
+      <div class="floor-name" id="goFloorName">푸드 에비뉴</div>
+    </div>
+    <div class="go-hi" id="goHi">BEST · B1F</div>
+    <button id="retryBtn" onclick="startGame()">▶&nbsp;&nbsp;RETRY</button>
+  </div>
+</div>
+
+<script>
+// ─── 층 데이터 ───
+const FLOORS = [
+  { id: 'B1', label: 'B1F', name: '푸드 에비뉴 & 마트' },
+  { id: '1',  label: '1F',  name: '명품 & 화장품 · 잡화' },
+  { id: '2',  label: '2F',  name: '여성 컨템포러리' },
+  { id: '3',  label: '3F',  name: '여성 패션' },
+  { id: '4',  label: '4F',  name: '남성 패션' },
+  { id: '5',  label: '5F',  name: '스포츠 & 아웃도어' },
+  { id: '6',  label: '6F',  name: '아동 & 유아용품' },
+  { id: '7',  label: '7F',  name: '가정 & 주방용품' },
+  { id: '8',  label: '8F',  name: '가전 & 디지털' },
+  { id: '9',  label: '9F',  name: '영화관 & 문화홀' },
+  { id: '10', label: '10F', name: '리빙 & 인테리어' },
+  { id: '11', label: '11F', name: '스카이파크' },
+  { id: '12', label: '12F', name: '푸드코트' },
+  { id: '13', label: '13F', name: '레스토랑 스트리트' },
+  { id: '14', label: '14F', name: '롯데리아 & 카페' },
+];
+
+const FLOOR_COUNT = FLOORS.length; // 15
+
+// 층수 → 인덱스: B1=0, 1F=1, ...
+function floorByY(worldY) {
+  // worldY 가 클수록 높이 올라간 것
+  // 각 층 간격: 800px 월드 유닛
+  const FLOOR_HEIGHT = 800;
+  const idx = Math.min(Math.floor(worldY / FLOOR_HEIGHT), FLOOR_COUNT - 1);
+  return Math.max(0, idx);
+}
+
+// ─── 색상 ───
+const COLORS = {
+  bg: '#FAF5EC',
+  platform: '#8B1A2D',
+  platformGold: '#C9A84C',
+  platformSpecial: '#5C0E1C',
+  player: '#8B1A2D',
+  playerGold: '#C9A84C',
+  trail: 'rgba(201,168,76,0.15)',
+  wall: '#E8DEC8',
+  wallLine: '#D4C9A8',
+  text: '#2C2416',
+};
+
+// ─── 상수 ───
+const CANVAS_W = 360;
+const CANVAS_H = 584;
+const GRAVITY = 0.45;
+const JUMP_FORCE = -13;
+const MOVE_SPEED = 4.5;
+const PLATFORM_W = 72;
+const PLATFORM_H = 10;
+const FLOOR_UNIT = 800; // 월드 유닛당 1층
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// ─── 게임 상태 ───
+let state = 'title'; // 'title' | 'play' | 'over'
+let player, platforms, cameraY, worldTop, frameId;
+let currentFloorIdx = 0, bestFloorIdx = 0;
+let keys = { left: false, right: false };
+let floorPopupTimer = 0;
+let particles = [];
+let bgOffset = 0;
+
+// ─── 초기화 ───
+function initGame() {
+  cameraY = 0;       // 카메라 y (월드 좌표, 올라갈수록 증가)
+  worldTop = 0;      // 지금까지 최고 worldY
+  currentFloorIdx = 0;
+
+  // 플레이어
+  player = {
+    x: CANVAS_W / 2 - 16,
+    y: CANVAS_H - 100,
+    w: 32, h: 40,
+    vx: 0, vy: 0,
+    onGround: false,
+    worldY: 0,        // 월드 기준 Y(높이, 클수록 높음)
+    maxWorldY: 0,
+    facing: 1,        // 1=right, -1=left
+    jumpAnim: 0,
+    trail: [],
+  };
+
+  // 발판 생성
+  platforms = [];
+  // 바닥 발판
+  platforms.push({ x: 0, y: CANVAS_H - 20, w: CANVAS_W, h: 20, worldY: 0, type: 'ground' });
+  generatePlatforms(0, CANVAS_H * 2);
+
+  particles = [];
+  floorPopupTimer = 0;
+}
+
+function generatePlatforms(fromWorldY, toWorldY) {
+  const GAP_Y = 90; // 발판 세로 간격
+  const startY = fromWorldY + GAP_Y;
+  for (let wy = startY; wy < toWorldY; wy += GAP_Y + Math.random() * 30) {
+    const x = 20 + Math.random() * (CANVAS_W - PLATFORM_W - 40);
+    const isSpecial = Math.random() < 0.12;
+    platforms.push({
+      x, y: 0,
+      w: isSpecial ? PLATFORM_W + 20 : PLATFORM_W,
+      h: PLATFORM_H,
+      worldY: wy,
+      type: isSpecial ? 'special' : 'normal',
+      springed: false,
+    });
+  }
+}
+
+// ─── 게임루프 ───
+function gameLoop() {
+  update();
+  draw();
+  frameId = requestAnimationFrame(gameLoop);
+}
+
+function update() {
+  if (state !== 'play') return;
+
+  // 이동
+  player.vx = 0;
+  if (keys.left) { player.vx = -MOVE_SPEED; player.facing = -1; }
+  if (keys.right) { player.vx = MOVE_SPEED; player.facing = 1; }
+
+  // 중력
+  player.vy += GRAVITY;
+  player.x += player.vx;
+  player.y += player.vy;
+
+  // 화면 좌우 루프
+  if (player.x + player.w < 0) player.x = CANVAS_W;
+  if (player.x > CANVAS_W) player.x = -player.w;
+
+  // 월드Y 업데이트 (위로 올라갈수록 증가)
+  const deltaUp = Math.max(0, CANVAS_H * 0.45 - player.y);
+  if (deltaUp > 0) {
+    cameraY += deltaUp;
+    player.y += deltaUp;
+    player.worldY = cameraY;
+  }
+  worldTop = Math.max(worldTop, cameraY);
+
+  // 발판 충돌 (위에서 아래로 떨어질 때만)
+  if (player.vy > 0) {
+    for (let p of platforms) {
+      const py = screenY(p.worldY);
+      if (
+        player.x + player.w > p.x &&
+        player.x < p.x + p.w &&
+        player.y + player.h > py &&
+        player.y + player.h < py + p.h + player.vy + 2
+      ) {
+        player.vy = JUMP_FORCE;
+        player.onGround = true;
+        player.jumpAnim = 8;
+        // 착지 파티클
+        spawnParticles(player.x + player.w / 2, py, p.type === 'special' ? 8 : 5);
+        break;
+      }
+    }
+  }
+
+  // 플레이어 trail
+  player.trail.push({ x: player.x + player.w/2, y: player.y + player.h/2, age: 0 });
+  if (player.trail.length > 10) player.trail.shift();
+  player.trail.forEach(t => t.age++);
+
+  player.jumpAnim = Math.max(0, player.jumpAnim - 1);
+
+  // 층수 업데이트
+  const newFloorIdx = floorByY(cameraY);
+  if (newFloorIdx > currentFloorIdx) {
+    currentFloorIdx = newFloorIdx;
+    if (currentFloorIdx > bestFloorIdx) bestFloorIdx = currentFloorIdx;
+    showFloorPopup(currentFloorIdx);
+    updateHUD();
+  }
+
+  // 발판 추가 생성
+  const highestPlatformY = Math.max(...platforms.map(p => p.worldY));
+  if (highestPlatformY < cameraY + CANVAS_H * 3) {
+    generatePlatforms(highestPlatformY, highestPlatformY + CANVAS_H * 2);
+  }
+
+  // 화면 밖 발판 제거
+  platforms = platforms.filter(p => screenY(p.worldY) < CANVAS_H + 60);
+
+  // 파티클
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.life--;
+    p.vy += 0.15;
+  });
+  particles = particles.filter(p => p.life > 0);
+
+  // 낙사 판정
+  if (player.y > CANVAS_H + 60) {
+    endGame();
+  }
+
+  // 배경 스크롤
+  bgOffset = (cameraY * 0.08) % 80;
+}
+
+function screenY(worldY) {
+  return CANVAS_H - (worldY - cameraY) - 20;
+}
+
+function spawnParticles(x, y, count) {
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 4,
+      vy: -Math.random() * 3,
+      life: 20 + Math.random() * 15,
+      size: 2 + Math.random() * 3,
+      color: Math.random() < 0.5 ? COLORS.platformGold : '#FFF5D0',
+    });
+  }
+}
+
+// ─── 그리기 ───
+function draw() {
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // 배경
+  drawBackground();
+
+  // 발판
+  for (let p of platforms) {
+    drawPlatform(p);
+  }
+
+  // 파티클
+  for (let p of particles) {
+    ctx.globalAlpha = p.life / 35;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // 플레이어
+  drawPlayer();
+}
+
+function drawBackground() {
+  // 크림 배경
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // 벽 줄무늬 (고급 벽지 느낌)
+  ctx.strokeStyle = COLORS.wallLine;
+  ctx.lineWidth = 0.5;
+  const lineSpacing = 40;
+  for (let y = -(bgOffset % lineSpacing); y < CANVAS_H; y += lineSpacing) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(CANVAS_W, y);
+    ctx.globalAlpha = 0.4;
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // 층별 색조 배경 (올라갈수록 색이 변함)
+  const progress = Math.min(currentFloorIdx / (FLOOR_COUNT - 1), 1);
+  const r = Math.round(250 + (200 - 250) * progress);
+  const g = Math.round(245 + (230 - 245) * progress);
+  const b = Math.round(236 + (220 - 236) * progress);
+  ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // 층 번호 워터마크
+  if (currentFloorIdx < FLOORS.length) {
+    ctx.save();
+    ctx.font = '900 120px "Playfair Display", serif';
+    ctx.fillStyle = 'rgba(139,26,45,0.04)';
+    ctx.textAlign = 'center';
+    ctx.fillText(FLOORS[currentFloorIdx].label, CANVAS_W / 2, CANVAS_H / 2 + 40);
+    ctx.restore();
+  }
+}
+
+function drawPlatform(p) {
+  const py = screenY(p.worldY);
+  if (py < -20 || py > CANVAS_H + 20) return;
+
+  if (p.type === 'ground') {
+    ctx.fillStyle = COLORS.platformSpecial;
+    ctx.fillRect(p.x, py, p.w, p.h);
+    // 금 테두리
+    ctx.strokeStyle = COLORS.platformGold;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(p.x, py, p.w, p.h);
+    return;
+  }
+
+  // 그림자
+  ctx.fillStyle = 'rgba(92,14,28,0.15)';
+  ctx.fillRect(p.x + 3, py + 3, p.w, p.h);
+
+  // 메인 플랫폼
+  if (p.type === 'special') {
+    ctx.fillStyle = COLORS.platformGold;
+  } else {
+    ctx.fillStyle = COLORS.platform;
+  }
+  ctx.fillRect(p.x, py, p.w, p.h);
+
+  // 상단 금 라인
+  ctx.fillStyle = p.type === 'special' ? '#FAF5EC' : COLORS.platformGold;
+  ctx.fillRect(p.x, py, p.w, 2);
+
+  // 플랫폼 레이블
+  if (p.type === 'special') {
+    ctx.font = '600 7px "Noto Serif KR", serif';
+    ctx.fillStyle = COLORS.platformSpecial;
+    ctx.textAlign = 'center';
+    ctx.fillText('LOTTE', p.x + p.w / 2, py + 7.5);
+  }
+}
+
+function drawPlayer() {
+  const px = player.x;
+  const py = player.y;
+  const squeeze = player.jumpAnim > 0 ? 0.8 : 1;
+  const stretch = player.jumpAnim > 0 ? 1.2 : 1;
+
+  ctx.save();
+  ctx.translate(px + player.w / 2, py + player.h / 2);
+
+  // 트레일
+  player.trail.forEach((t, i) => {
+    const alpha = (i / player.trail.length) * 0.12;
+    ctx.fillStyle = `rgba(201,168,76,${alpha})`;
+    const size = (i / player.trail.length) * 14;
+    ctx.beginPath();
+    ctx.arc(t.x - (px + player.w/2), t.y - (py + player.h/2), size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 몸통 (버건디 정장)
+  ctx.scale(player.facing * squeeze, stretch);
+  ctx.fillStyle = COLORS.player;
+  ctx.fillRect(-12, -14, 24, 22);
+
+  // 금 포켓 스퀘어
+  ctx.fillStyle = COLORS.playerGold;
+  ctx.fillRect(-8, -12, 5, 4);
+
+  // 넥타이
+  ctx.fillStyle = '#5C0E1C';
+  ctx.fillRect(-2, -14, 4, 14);
+  ctx.fillStyle = COLORS.playerGold;
+  ctx.fillRect(-1, -14, 2, 2);
+
+  // 다리
+  ctx.fillStyle = '#2C1810';
+  ctx.fillRect(-10, 8, 9, 12);
+  ctx.fillRect(1, 8, 9, 12);
+
+  // 구두
+  ctx.fillStyle = '#1A0808';
+  ctx.fillRect(-11, 18, 10, 4);
+  ctx.fillRect(0, 18, 10, 4);
+
+  // 머리
+  ctx.fillStyle = '#F5D5A0';
+  ctx.beginPath();
+  ctx.arc(0, -20, 10, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 머리카락
+  ctx.fillStyle = '#2C1810';
+  ctx.fillRect(-10, -30, 20, 12);
+  ctx.beginPath();
+  ctx.arc(0, -28, 10, Math.PI, Math.PI * 2);
+  ctx.fill();
+
+  // 눈
+  ctx.fillStyle = '#1A0808';
+  ctx.fillRect(-4, -22, 3, 3);
+  ctx.fillRect(2, -22, 3, 3);
+
+  // 입 (점프 중 웃음)
+  if (player.vy < 0) {
+    ctx.fillStyle = '#8B1A2D';
+    ctx.beginPath();
+    ctx.arc(0, -16, 3, 0, Math.PI);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// ─── UI 업데이트 ───
+function updateHUD() {
+  const cur = FLOORS[Math.min(currentFloorIdx, FLOOR_COUNT - 1)];
+  const best = FLOORS[Math.min(bestFloorIdx, FLOOR_COUNT - 1)];
+  document.getElementById('currentFloor').textContent = cur.label;
+  document.getElementById('hiScore').textContent = best.label;
+}
+
+function showFloorPopup(idx) {
+  const f = FLOORS[Math.min(idx, FLOOR_COUNT - 1)];
+  document.getElementById('fpFloor').textContent = f.label;
+  document.getElementById('fpName').textContent = f.name;
+  const popup = document.getElementById('floorPopup');
+  popup.classList.add('show');
+  clearTimeout(floorPopupTimer);
+  floorPopupTimer = setTimeout(() => popup.classList.remove('show'), 1800);
+}
+
+// ─── 게임 시작/종료 ───
+function startGame() {
+  document.getElementById('titleScreen').style.display = 'none';
+  document.getElementById('gameoverScreen').style.display = 'none';
+  state = 'play';
+  initGame();
+  updateHUD();
+  if (frameId) cancelAnimationFrame(frameId);
+  gameLoop();
+}
+
+function endGame() {
+  state = 'over';
+  const cur = FLOORS[Math.min(currentFloorIdx, FLOOR_COUNT - 1)];
+  const best = FLOORS[Math.min(bestFloorIdx, FLOOR_COUNT - 1)];
+  document.getElementById('goFloor').textContent = cur.label;
+  document.getElementById('goFloorName').textContent = cur.name;
+  document.getElementById('goHi').textContent = `BEST · ${best.label}`;
+  document.getElementById('gameoverScreen').style.display = 'flex';
+}
+
+// ─── 컨트롤 ───
+const btnLeft = document.getElementById('btnLeft');
+const btnRight = document.getElementById('btnRight');
+
+btnLeft.addEventListener('touchstart', e => { e.preventDefault(); keys.left = true; }, { passive: false });
+btnLeft.addEventListener('touchend', e => { e.preventDefault(); keys.left = false; }, { passive: false });
+btnLeft.addEventListener('mousedown', () => keys.left = true);
+btnLeft.addEventListener('mouseup', () => keys.left = false);
+
+btnRight.addEventListener('touchstart', e => { e.preventDefault(); keys.right = true; }, { passive: false });
+btnRight.addEventListener('touchend', e => { e.preventDefault(); keys.right = false; }, { passive: false });
+btnRight.addEventListener('mousedown', () => keys.right = true);
+btnRight.addEventListener('mouseup', () => keys.right = false);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') keys.left = true;
+  if (e.key === 'ArrowRight') keys.right = true;
+});
+document.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft') keys.left = false;
+  if (e.key === 'ArrowRight') keys.right = false;
+});
+
+// ─── 초기 타이틀 그리기 ───
+(function initDraw() {
+  ctx.fillStyle = COLORS.bg;
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+})();
+</script>
+</body>
+</html>
